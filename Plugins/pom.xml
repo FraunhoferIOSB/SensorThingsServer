@@ -17,5 +17,6 @@
         <module>OpenApi</module>
         <module>Actuation</module>
         <module>MultiDatastream</module>
+        <module>OMSModel</module>
     </modules>
 </project>
