@@ -34,6 +34,7 @@ import de.fraunhofer.iosb.ilt.frostserver.persistence.PersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.PostgresPersistenceManager;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.JsonValue;
+import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.bindings.PostGisGeometryBinding;
 import de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.factories.EntityFactories;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_END;
 import static de.fraunhofer.iosb.ilt.frostserver.persistence.pgjooq.fieldwrapper.StaTimeIntervalWrapper.KEY_TIME_INTERVAL_START;
@@ -447,7 +448,7 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
         final int idxSaTy = tai.tFeatureOfInterest.registerField("sample_type", SQLDataType.VARCHAR(100));
         final int idxPara = tai.tFeatureOfInterest.registerField("parameters", DefaultDataType.getDefaultDataType(TYPE_JSONB), new JsonBinding());
         final int idxShap = tai.tFeatureOfInterest.registerField("shape", SQLDataType.CLOB);
-        final int idxGeom = tai.tFeatureOfInterest.registerField("geom", DefaultDataType.getDefaultDataType(TYPE_GEOMETRY));
+        final int idxGeom = tai.tFeatureOfInterest.registerField("geom", DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), new PostGisGeometryBinding());
 
         PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = tai.tFeatureOfInterest.getPropertyFieldRegistry();
         pfReg.addEntryId(idManager, StaTableDynamic::getId);
@@ -488,7 +489,7 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
         final int idxMeta = tai.tHost.registerField("metadata", SQLDataType.CLOB);
         final int idxLink = tai.tHost.registerField("link", SQLDataType.CLOB);
         final int idxLoca = tai.tHost.registerField("location", SQLDataType.CLOB);
-        final int idxGeom = tai.tHost.registerField("geom", DefaultDataType.getDefaultDataType(TYPE_GEOMETRY));
+        final int idxGeom = tai.tHost.registerField("geom", DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), new PostGisGeometryBinding());
 
         PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = tai.tHost.getPropertyFieldRegistry();
         pfReg.addEntryId(idManager, StaTableDynamic::getId);
@@ -605,7 +606,7 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
         final int idxMeta = tai.tObserver.registerField("metadata", SQLDataType.CLOB);
         final int idxLink = tai.tObserver.registerField("link", SQLDataType.CLOB);
         final int idxLoca = tai.tObserver.registerField("location", SQLDataType.CLOB);
-        final int idxGeom = tai.tObserver.registerField("geom", DefaultDataType.getDefaultDataType(TYPE_GEOMETRY));
+        final int idxGeom = tai.tObserver.registerField("geom", DefaultDataType.getDefaultDataType(TYPE_GEOMETRY), new PostGisGeometryBinding());
 
         PropertyFieldRegistry<J, StaTableDynamic<J>> pfReg = tai.tObserver.getPropertyFieldRegistry();
         pfReg.addEntryId(idManager, StaTableDynamic::getId);
