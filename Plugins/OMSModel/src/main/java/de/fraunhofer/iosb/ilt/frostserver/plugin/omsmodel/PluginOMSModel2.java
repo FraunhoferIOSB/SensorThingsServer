@@ -31,6 +31,7 @@ import de.fraunhofer.iosb.ilt.frostserver.settings.Settings;
 import de.fraunhofer.iosb.ilt.frostserver.settings.annotation.DefaultValueBoolean;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,12 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PluginOMSModel2.class.getName());
 
+    private static final String MODEL_PATH = "pluginomsmodel";
+    private static final String[] MODEL_FILES = new String[]{
+        "omsmodelDeployment.json",
+        "omsmodelObserver.json"
+    };
+
     @DefaultValueBoolean(false)
     public static final String TAG_ENABLE_OMS_MODEL = "OMSModel.enable";
 
@@ -55,7 +62,7 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
     private CoreSettings settings;
     private boolean enabled;
     private boolean fullyInitialised;
-    private DefModel modelDefinition;
+    private List<DefModel> modelDefinitions = new ArrayList<>();
 
     public PluginOMSModel2() {
         LOGGER.info("Creating new Core Model Plugin.");
@@ -69,14 +76,23 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
         if (enabled) {
             settings.getPluginManager().registerPlugin(this);
 
-            InputStream stream = getClass().getClassLoader().getResourceAsStream("pluginomsmodel/omsmodel.json");
-            try {
-                ObjectMapper objectMapper = new ObjectMapper();
-                modelDefinition = objectMapper.readValue(stream, DefModel.class);
-                modelDefinition.init();
-            } catch (IOException ex) {
-                LOGGER.error("Failed to load model definition", ex);
+            for (String fileName : MODEL_FILES) {
+                loadModelFile(fileName);
             }
+        }
+    }
+
+    private void loadModelFile(String fileName) {
+        final String fullPath = MODEL_PATH + "/" + fileName;
+        LOGGER.info("Loading model definition from {}", fullPath);
+        InputStream stream = getClass().getClassLoader().getResourceAsStream(fullPath);
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            DefModel modelDefinition = objectMapper.readValue(stream, DefModel.class);
+            modelDefinition.init();
+            modelDefinitions.add(modelDefinition);
+        } catch (IOException ex) {
+            LOGGER.error("Failed to load model definition", ex);
         }
     }
 
@@ -104,24 +120,30 @@ public class PluginOMSModel2 implements PluginRootDocument, PluginModel, ConfigD
     @Override
     public void registerEntityTypes() {
         ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelDefinition.registerEntityTypes(modelRegistry);
+        for (DefModel modelDefinition : modelDefinitions) {
+            modelDefinition.registerEntityTypes(modelRegistry);
+        }
     }
 
     @Override
     public void registerProperties() {
         ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelDefinition.registerProperties(modelRegistry);
+        for (DefModel modelDefinition : modelDefinitions) {
+            modelDefinition.registerProperties(modelRegistry);
+        }
     }
 
     @Override
     public boolean linkEntityTypes(PersistenceManager pm) {
         LOGGER.info("Initialising OMS Model Types...");
         ModelRegistry modelRegistry = settings.getModelRegistry();
-        modelDefinition.linkEntityTypes(modelRegistry);
-        pm.loadMapping(modelDefinition);
+        for (DefModel modelDefinition : modelDefinitions) {
+            modelDefinition.linkEntityTypes(modelRegistry);
+            pm.addModelMapping(modelDefinition);
+        }
 
         // Done, release the model definition.
-        modelDefinition = null;
+        modelDefinitions = null;
         fullyInitialised = true;
         return true;
     }
