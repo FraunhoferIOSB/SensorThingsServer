@@ -85,7 +85,7 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
     public final EntityPropertyMain<Object> epDataQuality = new EntityPropertyMain<>("dataQuality", TYPE_REFERENCE_OBJECT, true, false);
     public final EntityPropertyMain<String> epDescription = new EntityPropertyMain<>("description", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<String> epLink = new EntityPropertyMain<>("link", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>("location", null, true, false);
+    public final EntityPropertyMain<Object> epLocation = new EntityPropertyMain<>("location", TYPE_REFERENCE_OBJECT, true, false);
     public final EntityPropertyMain<String> epMetadata = new EntityPropertyMain<>("metadata", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<String> epName = new EntityPropertyMain<>("name", TYPE_REFERENCE_STRING);
     public final EntityPropertyMain<String> epObservationType = new EntityPropertyMain<>("observationType", TYPE_REFERENCE_STRING);
@@ -95,7 +95,7 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
     public final EntityPropertyMain<Object> epResult = new EntityPropertyMain<>("Result", TYPE_REFERENCE_OBJECT, true, true);
     public final EntityPropertyMain<TimeInstant> epResultTime = new EntityPropertyMain<>("ResultTime", TYPE_REFERENCE_TIMEINSTANT, false, true);
     public final EntityPropertyMain<String> epSampleType = new EntityPropertyMain<>("sampleType", TYPE_REFERENCE_STRING);
-    public final EntityPropertyMain<Object> epShape = new EntityPropertyMain<>("shape", null, true, false);
+    public final EntityPropertyMain<Object> epShape = new EntityPropertyMain<>("shape", TYPE_REFERENCE_OBJECT, true, false);
     public final EntityPropertyMain<TimeValue> epDeploymentTime = new EntityPropertyMain<>("deploymentTime", TYPE_REFERENCE_TIMEVALUE, false, false);
     public final EntityPropertyMain<TimeInterval> epValidTime = new EntityPropertyMain<>("ValidTime", TYPE_REFERENCE_TIMEINTERVAL);
     public final EntityPropertyMain<String> epValue = new EntityPropertyMain<>("value", TYPE_REFERENCE_STRING);
@@ -172,7 +172,22 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
     }
 
     @Override
+    public void registerEntityTypes() {
+        LOGGER.info("Initialising OMS Model Types...");
+        ModelRegistry modelRegistry = settings.getModelRegistry();
+        modelRegistry.registerEntityType(etDeployment);
+        modelRegistry.registerEntityType(etFeatureOfInterest);
+        modelRegistry.registerEntityType(etHost);
+        modelRegistry.registerEntityType(etObservation);
+        modelRegistry.registerEntityType(etObservedProcedure);
+        modelRegistry.registerEntityType(etObservedProperty);
+        modelRegistry.registerEntityType(etObserver);
+        modelRegistry.registerEntityType(etResult);
+    }
+
+    @Override
     public void registerProperties() {
+        LOGGER.info("Initialising OMS Model Properties...");
         ModelRegistry modelRegistry = settings.getModelRegistry();
         registerEps(modelRegistry);
         registerNps(modelRegistry);
@@ -251,10 +266,98 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
     }
 
     @Override
-    public boolean registerEntityTypes(PersistenceManager pm) {
-        LOGGER.info("Initialising OMS Model Types...");
-        ModelRegistry modelRegistry = settings.getModelRegistry();
-        registerTypes(modelRegistry);
+    public boolean linkEntityTypes(PersistenceManager pm) {
+        LOGGER.info("Linking OMS Model Types...");
+        etDeployment
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epLink, false)
+                .registerProperty(epReason, false)
+                .registerProperty(epDeploymentTime, false)
+                .registerProperty(npObserver, true)
+                .registerProperty(npHost, true);
+        etFeatureOfInterest
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epLink, false)
+                .registerProperty(epAccuracyHori, false)
+                .registerProperty(epAccuracyVert, false)
+                .registerProperty(epSampleType, false)
+                .registerProperty(epParameters, false)
+                .registerProperty(epShape, false)
+                .registerProperty(npObservations, false);
+        etHost
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epLink, false)
+                .registerProperty(epLocation, false)
+                .registerProperty(npDeployments, false)
+                .registerProperty(npObservations, false);
+        etObservation
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, false)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epObservationType, false)
+                .registerProperty(epPhenomenonTime, false)
+                .registerProperty(epResultTime, false)
+                .registerProperty(epValidTime, false)
+                .registerProperty(epDataQuality, false)
+                .registerProperty(epParameters, false)
+                .registerProperty(npFoi, true)
+                .registerProperty(npHost, true)
+                .registerProperty(npResults, false)
+                .registerProperty(npObservedProcedure, true)
+                .registerProperty(npObservedProperty, true)
+                .registerProperty(npObserver, true);
+        etObservedProcedure
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epLink, false)
+                .registerProperty(npObservations, false);
+        etObservedProperty
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epLink, false)
+                .registerProperty(npObservations, false);
+        etObserver
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epLink, false)
+                .registerProperty(epLocation, false)
+                .registerProperty(npDeployments, false)
+                .registerProperty(npObservations, false);
+        etResult
+                .registerProperty(ModelRegistry.EP_ID, false)
+                .registerProperty(ModelRegistry.EP_SELFLINK, false)
+                .registerProperty(epName, true)
+                .registerProperty(epDescription, false)
+                .registerProperty(epMetadata, false)
+                .registerProperty(epPhenomenonTime, false)
+                .registerProperty(epResultTime, false)
+                .registerProperty(epResult, true)
+                .registerProperty(epDataQuality, false)
+                .registerProperty(epValidTime, false)
+                .registerProperty(npObservation, true);
 
         if (pm instanceof PostgresPersistenceManager) {
             PostgresPersistenceManager ppm = (PostgresPersistenceManager) pm;
@@ -617,106 +720,6 @@ public class PluginOMSModel implements PluginRootDocument, PluginModel, ConfigDe
                 new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_START, t -> t.field(idxVaSt)),
                 new PropertyFieldRegistry.NFP<>(KEY_TIME_INTERVAL_END, t -> t.field(idxVaEn)));
 
-    }
-
-    private void registerTypes(ModelRegistry modelRegistry) {
-        modelRegistry.registerEntityType(etDeployment)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epLink, false)
-                .registerProperty(epReason, false)
-                .registerProperty(epDeploymentTime, false)
-                .registerProperty(npObserver, true)
-                .registerProperty(npHost, true);
-
-        modelRegistry.registerEntityType(etFeatureOfInterest)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epLink, false)
-                .registerProperty(epAccuracyHori, false)
-                .registerProperty(epAccuracyVert, false)
-                .registerProperty(epSampleType, false)
-                .registerProperty(epParameters, false)
-                .registerProperty(epShape, false)
-                .registerProperty(npObservations, false);
-
-        modelRegistry.registerEntityType(etHost)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epLink, false)
-                .registerProperty(epLocation, false)
-                .registerProperty(npDeployments, false)
-                .registerProperty(npObservations, false);
-
-        modelRegistry.registerEntityType(etObservation)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, false)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epObservationType, false)
-                .registerProperty(epPhenomenonTime, false)
-                .registerProperty(epResultTime, false)
-                .registerProperty(epValidTime, false)
-                .registerProperty(epDataQuality, false)
-                .registerProperty(epParameters, false)
-                .registerProperty(npFoi, true)
-                .registerProperty(npHost, true)
-                .registerProperty(npResults, false)
-                .registerProperty(npObservedProcedure, true)
-                .registerProperty(npObservedProperty, true)
-                .registerProperty(npObserver, true);
-
-        modelRegistry.registerEntityType(etObservedProcedure)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epLink, false)
-                .registerProperty(npObservations, false);
-
-        modelRegistry.registerEntityType(etObservedProperty)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epLink, false)
-                .registerProperty(npObservations, false);
-
-        modelRegistry.registerEntityType(etObserver)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epLink, false)
-                .registerProperty(epLocation, false)
-                .registerProperty(npDeployments, false)
-                .registerProperty(npObservations, false);
-
-        modelRegistry.registerEntityType(etResult)
-                .registerProperty(ModelRegistry.EP_ID, false)
-                .registerProperty(ModelRegistry.EP_SELFLINK, false)
-                .registerProperty(epName, true)
-                .registerProperty(epDescription, false)
-                .registerProperty(epMetadata, false)
-                .registerProperty(epPhenomenonTime, false)
-                .registerProperty(epResultTime, false)
-                .registerProperty(epResult, true)
-                .registerProperty(epDataQuality, false)
-                .registerProperty(epValidTime, false)
-                .registerProperty(npObservation, true);
     }
 
     public <J extends Comparable<J>> void handleResult(StaTableDynamic<J> table, Map<Field, Object> record, Entity entity,
